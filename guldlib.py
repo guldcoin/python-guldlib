@@ -58,7 +58,6 @@ def get_guld_sub_bals(username):
 def get_guld_overview():
     cmd = ""
     cmd = "find {0} -name '*.dat' | while read line ; do echo include $line ; done | ledger -f - --depth 2 bal ^guld:Equity ^guld:Liabilities".format(os.path.join(GULD_HOME, "ledger"))
-    print(cmd)
     ledgerBals = subprocess.check_output(cmd, shell=True)
     return ledgerBals.decode("utf-8")
 
@@ -221,14 +220,16 @@ def getAddresses(counterparty, owner=None, commodity='BTC', side='deposit'):
     except subprocess.CalledProcessError as cpe:
         print(cpe)
     if addys is not None:
-        return addys.decode('utf-8').replace(spath, '').strip('/').split('/')
+        return [addys.decode('utf-8').replace(spath, '').strip('/').split('/')[0]]
     return [reserve_address(commodity, counterparty, owner)]
 
 
 def reserve_address(commodity, counterparty, owner):
     alist = os.listdir(os.path.join(GULD_HOME, 'ledger', commodity))
     for addy in alist:
-        if len(os.listdir(os.path.join(GULD_HOME, 'ledger', commodity, addy))) == 0:
-            with open(os.path.join(GULD_HOME, 'ledger', commodity, addy, '.gap.json'), 'w') as f:
-                f.write('{"owner":"%s","counterparty":"%s"}' % (owner, counterparty))
-            return addy
+        dirlist = os.listdir(os.path.join(GULD_HOME, 'ledger', commodity, addy))
+        if len(dirlist) == 1 and '.gap.json' in dirlist[0]:
+            if os.stat('%s/.gap.json' % addy).st_size == 0:
+                with open(os.path.join(GULD_HOME, 'ledger', commodity, addy, '.gap.json'), 'w') as f:
+                    f.write('{"owner":"%s","counterparty":"%s"}' % (owner, counterparty))
+                return addy
