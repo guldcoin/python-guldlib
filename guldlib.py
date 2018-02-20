@@ -229,7 +229,7 @@ def reserve_address(commodity, counterparty, owner):
     for addy in alist:
         dirlist = os.listdir(os.path.join(GULD_HOME, 'ledger', commodity, addy))
         if len(dirlist) == 1 and '.gap.json' in dirlist[0]:
-            if os.stat('%s/.gap.json' % addy).st_size == 0:
+            if os.stat(os.path.join(GULD_HOME, addy, '.gap.json')).st_size == 0:
                 with open(os.path.join(GULD_HOME, 'ledger', commodity, addy, '.gap.json'), 'w') as f:
                     f.write('{"owner":"%s","counterparty":"%s"}' % (owner, counterparty))
                 return addy
