@@ -55,6 +55,14 @@ def get_guld_sub_bals(username):
     return ledgerBals.decode("utf-8")
 
 
+def get_guld_overview():
+    cmd = ""
+    cmd = "find {0} -name '*.dat' | while read line ; do echo include $line ; done | ledger -f - --depth 2 bal ^guld:Equity ^guld:Liabilities".format(os.path.join(GULD_HOME, "ledger"))
+    print(cmd)
+    ledgerBals = subprocess.check_output(cmd, shell=True)
+    return ledgerBals.decode("utf-8")
+
+
 def get_assets_liabs(username, in_commodity=None):
     cmd = ""
     if in_commodity is not None:
