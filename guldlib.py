@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-__version__ = '0.0.1'
+__version__ = '0.0.3'
 import gnupg
 import os
 import re
@@ -75,9 +75,9 @@ def get_assets_liabs(username, in_commodity=None):
 def get_balance(username, in_commodity=None):
     cmd = ""
     if in_commodity is not None:
-        cmd = "printf \"$(find {2} -name '*.db')\n$(grep -rl {0} {1})\" | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal ^{0}: -X {3}".format(username, os.path.join(GULD_HOME, "ledger"), os.path.join(GULD_HOME, "ledger", "prices"), in_commodity)
+        cmd = "printf \"$(find {2} -name '*.db')\n$(grep -rl {0} {1})\" | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal [^a-zA-Z0-9\-]{0}[^a-zA-Z0-9\-] -X {3}".format(username, os.path.join(GULD_HOME, "ledger"), os.path.join(GULD_HOME, "ledger", "prices"), in_commodity)
     else:
-        cmd = "grep -rl {0} {1} | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal ^{0}:".format(username, os.path.join(GULD_HOME, "ledger"))
+        cmd = "grep -rl {0} {1} | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal [^a-zA-Z0-9\-]{0}[^a-zA-Z0-9\-]".format(username, os.path.join(GULD_HOME, "ledger"))
     ledgerBals = subprocess.check_output(cmd, shell=True)
     return ledgerBals.decode("utf-8")
 
@@ -130,15 +130,23 @@ def get_time_date_stamp():
     return dt, tstamp
 
 
-def gen_register_individual(name, dt=None, tstamp=None):
+def gen_register(name, ntype='individual', qty=1, dt=None, tstamp=None):
     if dt is None or tstamp is None:
         dt, tstamp = get_time_date_stamp()
-    return ('{1} * register individual\n'
+    if ntype == 'individual':
+        amount = 1
+    elif ntype == 'device':
+        amount = 1
+    elif ntype == 'group':
+        amount = qty
+    else:
+        return
+    return ('{1} * register {3}\n'
         '    ; timestamp: {2}\n'
-        '    {0}:Assets   -1 GULD\n'
-        '    {0}:Expenses:guld:register   1 GULD\n'
-        '    guld:Liabilities   1 GULD\n'
-        '    guld:Income:register:individual:{0}   -1 GULD\n\n'.format(name, dt, tstamp))
+        '    {0}:Assets   -{4} GULD\n'
+        '    {0}:Expenses:guld:register   {4} GULD\n'
+        '    guld:Liabilities   {4} GULD\n'
+        '    guld:Income:register:{3}:{0}   -{4} GULD\n\n'.format(name, dt, tstamp, ntype, amount))
 
 
 def gen_transfer(sender, receiver, amount, commodity="GULD", dt=None, tstamp=None):
