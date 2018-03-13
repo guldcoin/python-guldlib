@@ -200,14 +200,12 @@ def strip_pgp_sig(sigtext):
     return sigtext
 
 
-def get_signer_name(sigtext):
+def get_signer_fpr(sigtext):
     verified = gpg.verify(sigtext)
     if not verified.valid:
         return
-    trust = get_pgp_trust(verified.fingerprint)
-    if verified.trust_level is not None and trust >= verified.TRUST_NEVER:
-        return get_name_by_pgp_fpr(verified.fingerprint)
-    return
+    else:
+        return verified.fingerprint
 
 
 def getAddresses(counterparty, owner=None, commodity='BTC', side='deposit'):
