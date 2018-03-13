@@ -49,15 +49,14 @@ def get_price(commodity):
 
 
 def get_guld_sub_bals(username):
-    cmd = ""
-    cmd = "grep -rl {0} {1} | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal ^guld:Equity:{0}$ ^guld:Income:register:individual:{0}$".format(username, os.path.join(GULD_HOME, "ledger"))
+    cmd = "grep -rl {0} {1} | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal ^guld:Equity:{0}$ ^guld:Income:register:individual:{0}$".format(username, os.path.join(GULD_HOME, "ledger", "GULD"))
     ledgerBals = subprocess.check_output(cmd, shell=True)
     return ledgerBals.decode("utf-8")
 
 
 def get_guld_overview():
     cmd = ""
-    cmd = "find {0} -name '*.dat' | while read line ; do echo include $line ; done | ledger -f - --depth 2 bal ^guld:Equity ^guld:Liabilities".format(os.path.join(GULD_HOME, "ledger"))
+    cmd = "find {0} -name '*.dat' | while read line ; do echo include $line ; done | ledger -f - --depth 2 bal ^guld:Equity ^guld:Liabilities".format(os.path.join(GULD_HOME, "ledger", "GULD"))
     ledgerBals = subprocess.check_output(cmd, shell=True)
     return ledgerBals.decode("utf-8")
 
@@ -65,9 +64,9 @@ def get_guld_overview():
 def get_assets_liabs(username, in_commodity=None):
     cmd = ""
     if in_commodity is not None:
-        cmd = "printf \"$(find {2} -name '*.db')\n$(grep -rl {0} {1})\" | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal ^{0}:Assets ^{0}:Liabilities -X {3}".format(username, os.path.join(GULD_HOME, "ledger"), os.path.join(GULD_HOME, "ledger", "prices"), in_commodity)
+        cmd = "printf \"$(find {2} -name '*.db')\n$(grep -rl {0} {1})\" | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal ^{0}:Assets ^{0}:Liabilities -X {3}".format(username, os.path.join(GULD_HOME, "ledger", "GULD"), os.path.join(GULD_HOME, "ledger", "prices"), in_commodity)
     else:
-        cmd = "grep -rl {0} {1} | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal ^{0}:Assets ^{0}:Liabilities".format(username, os.path.join(GULD_HOME, "ledger"))
+        cmd = "grep -rl {0} {1} | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal ^{0}:Assets ^{0}:Liabilities".format(username, os.path.join(GULD_HOME, "ledger", "GULD"))
     ledgerBals = subprocess.check_output(cmd, shell=True)
     return ledgerBals.decode("utf-8")
 
@@ -75,9 +74,9 @@ def get_assets_liabs(username, in_commodity=None):
 def get_balance(username, in_commodity=None):
     cmd = ""
     if in_commodity is not None:
-        cmd = "printf \"$(find {2} -name '*.db')\n$(grep -rl {0} {1})\" | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal [^a-zA-Z0-9\-]{0}[^a-zA-Z0-9\-] -X {3}".format(username, os.path.join(GULD_HOME, "ledger"), os.path.join(GULD_HOME, "ledger", "prices"), in_commodity)
+        cmd = "printf \"$(find {2} -name '*.db')\n$(grep -rl {0} {1})\" | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal [^a-zA-Z0-9\-]{0}[^a-zA-Z0-9\-] -X {3}".format(username, os.path.join(GULD_HOME, "ledger", "GULD"), os.path.join(GULD_HOME, "ledger", "prices"), in_commodity)
     else:
-        cmd = "grep -rl {0} {1} | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal [^a-zA-Z0-9\-]{0}[^a-zA-Z0-9\-]".format(username, os.path.join(GULD_HOME, "ledger"))
+        cmd = "grep -rl {0} {1} | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal [^a-zA-Z0-9\-]{0}[^a-zA-Z0-9\-]".format(username, os.path.join(GULD_HOME, "ledger", "GULD"))
     ledgerBals = subprocess.check_output(cmd, shell=True)
     return ledgerBals.decode("utf-8")
 
