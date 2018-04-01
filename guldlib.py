@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-__version__ = '0.0.3'
+__version__ = '0.0.4'
 import gnupg
 import os
 import re
@@ -129,15 +129,34 @@ def get_time_date_stamp():
     return dt, tstamp
 
 
+def gen_redeem_registration_fee(name, ntype='individual', qty=1, dt=None, tstamp=None):
+    if dt is None or tstamp is None:
+        dt, tstamp = get_time_date_stamp()
+    if ntype == 'individual':
+        amount = 0.9
+    elif ntype == 'device':
+        amount = 0.09
+    elif ntype == 'group':
+        amount = qty * 0.9
+    else:
+        return
+    return ('{1} * {3} registration fee rebate\n'
+        '    ; timestamp: {2}\n'
+        '    {0}:Assets   {4} GULD\n'
+        '    {0}:Income:guld:register:fee-rebate   -{4} GULD\n'
+        '    guld:Liabilities   -{4} GULD\n'
+        '    guld:Income:register:{3}:{0}   {4} GULD\n\n'.format(name, dt, tstamp, ntype, amount))
+
+
 def gen_register(name, ntype='individual', qty=1, dt=None, tstamp=None):
     if dt is None or tstamp is None:
         dt, tstamp = get_time_date_stamp()
     if ntype == 'individual':
-        amount = 1
+        amount = 0.1
     elif ntype == 'device':
-        amount = 1
+        amount = 0.01
     elif ntype == 'group':
-        amount = qty
+        amount = qty * 0.1
     else:
         return
     return ('{1} * register {3}\n'
