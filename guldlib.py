@@ -83,10 +83,12 @@ def get_balance(username, in_commodity=None):
 
 def is_valid_ledger(l):
     cmd = "printf \"{0}\" | ledger -f - source".format(l.replace(';', '\;').replace('\n', '\\n'))
-    if subprocess.call(cmd, shell=True) == 0:
-        return True
-    else:
+    try:
+        output = subprocess.check_output(cmd, shell=True)
+        return output == b""
+    except subprocess.CalledProcessError:
         return False
+    return False
 
 
 def is_name_taken(username):
