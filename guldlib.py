@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-__version__ = '0.0.7'
+__version__ = '0.0.8'
 import gnupg
 import os
 import re
@@ -82,7 +82,11 @@ def get_balance(username, in_commodity=None):
 
 
 def is_valid_ledger(l):
-    cmd = "printf \"{0}\" | ledger -f - source".format(l.replace(';', '\;').replace('\n', '\\n'))
+    if len(l) <= 10:
+        return False
+
+    cmd = "result=$(printf \"{0}\"); if [ $result -eq \"\" ]; then echo \"----\"; else echo \"$result\"; fi | ledger -f - source".format(l.replace(';', '\;').replace('\n', '\\n'))
+
     try:
         output = subprocess.check_output(cmd, shell=True)
         return output == b""
