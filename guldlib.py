@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-__version__ = '0.0.6'
+__version__ = '0.0.7'
 import gnupg
 import os
 import re
@@ -213,9 +213,9 @@ def get_transaction_timestamp(txtext):
 
 
 def get_transaction_amount(txtext):
-    la = txtext.strip().split('\n')[2].replace(',', '').split(' ').strip()
-    ult = la[-1]
-    penult = la[-2]
+    la = txtext.strip().split('\n')[2].replace(',', '').split(' ')
+    ult = la[-1].strip()
+    penult = la[-2].strip()
     if all(c in set('.-' + string.digits) for c in ult):
         return ult, penult
     else:
