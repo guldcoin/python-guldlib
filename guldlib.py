@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-__version__ = '0.0.5'
+__version__ = '0.0.6'
 import gnupg
 import os
 import re
@@ -81,6 +81,14 @@ def get_balance(username, in_commodity=None):
     return ledgerBals.decode("utf-8")
 
 
+def is_valid_ledger(l):
+    cmd = "printf \"{0}\" | ledger -f - source".format(l.replace(';', '\;').replace('\n', '\\n'))
+    if subprocess.call(cmd, shell=True) == 0:
+        return True
+    else:
+        return False
+
+
 def is_name_taken(username):
     return os.path.isdir(os.path.join(GULD_HOME, 'ledger', 'GULD', username.lower()))
 
@@ -148,7 +156,9 @@ def gen_redeem_registration_fee(name, ntype='individual', qty=1, dt=None, tstamp
         '    guld:Income:register:{3}:{0}   {4} GULD\n\n'.format(name, dt, tstamp, ntype, amount))
 
 
-def gen_register(name, ntype='individual', qty=1, dt=None, tstamp=None):
+def gen_register(nname, ntype='individual', qty=1, dt=None, tstamp=None, payer=None):
+    if payer is None:
+        payer = nname
     if dt is None or tstamp is None:
         dt, tstamp = get_time_date_stamp()
     if ntype == 'individual':
@@ -161,10 +171,10 @@ def gen_register(name, ntype='individual', qty=1, dt=None, tstamp=None):
         return
     return ('{1} * register {3}\n'
         '    ; timestamp: {2}\n'
-        '    {0}:Assets   -{4} GULD\n'
-        '    {0}:Expenses:guld:register   {4} GULD\n'
+        '    {5}:Assets   -{4} GULD\n'
+        '    {5}:Expenses:guld:register   {4} GULD\n'
         '    guld:Liabilities   {4} GULD\n'
-        '    guld:Income:register:{3}:{0}   -{4} GULD\n\n'.format(name, dt, tstamp, ntype, amount))
+        '    guld:Income:register:{3}:{0}   -{4} GULD\n\n'.format(nname, dt, tstamp, ntype, amount, payer))
 
 
 def gen_transfer(sender, receiver, amount, commodity="GULD", dt=None, tstamp=None):
