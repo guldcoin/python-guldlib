@@ -85,7 +85,7 @@ def is_valid_ledger(l):
     if len(l) <= 10:
         return False
 
-    cmd = "result=$(printf \"{0}\"); if [ $result -eq \"\" ]; then echo \"----\"; else echo \"$result\"; fi | ledger -f - source".format(l.replace(';', '\;').replace('\n', '\\n'))
+    cmd = "result=$(printf \"{0}\"); if [ \"$result\" -eq \"\" ]; then echo \"----\"; else echo \"$result\"; fi | ledger -f - source".format(l.replace(';', '\;').replace('\n', '\\n'))
 
     try:
         output = subprocess.check_output(cmd, shell=True)
