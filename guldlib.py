@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-__version__ = '0.0.8'
+__version__ = '0.1.0'
 import gnupg
 import os
 import re
@@ -55,8 +55,13 @@ def get_guld_sub_bals(username):
 
 
 def get_guld_overview():
-    cmd = ""
     cmd = "find {0} -name '*.dat' | while read line ; do echo include $line ; done | ledger -f - --depth 2 bal ^guld:Equity ^guld:Liabilities".format(os.path.join(GULD_HOME, "ledger", "GULD"))
+    ledgerBals = subprocess.check_output(cmd, shell=True)
+    return ledgerBals.decode("utf-8")
+
+
+def get_guld_member_overview(mname):
+    cmd = "find {0} -name '*.dat' | while read line ; do echo include $line ; done | ledger -f - --depth 5 bal ^guld:Equity:{1} ^guld:Income:register:.*:{1}".format(os.path.join(GULD_HOME, "ledger", "GULD"), mname)
     ledgerBals = subprocess.check_output(cmd, shell=True)
     return ledgerBals.decode("utf-8")
 
@@ -84,9 +89,7 @@ def get_balance(username, in_commodity=None):
 def is_valid_ledger(l):
     if len(l) <= 10:
         return False
-
     cmd = "result=$(printf \"{0}\"); if [ \"$result\" -eq \"\" ]; then echo \"----\"; else echo \"$result\"; fi | ledger -f - source".format(l.replace(';', '\;').replace('\n', '\\n'))
-
     try:
         output = subprocess.check_output(cmd, shell=True)
         return output == b""
@@ -210,6 +213,8 @@ def get_transaction_type(txtext):
         return 'transfer'
     elif txtext.find("* register individual") > 0:
         return 'register individual'
+    elif txtext.find("* register group") > 0:
+        return 'register group'
     elif txtext.find("* grant") > 0:
         return 'grant'
 
