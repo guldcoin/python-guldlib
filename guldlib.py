@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-__version__ = '0.0.4'
+__version__ = '0.0.5'
 import gnupg
 import os
 import re
@@ -199,11 +199,11 @@ def get_transaction_type(txtext):
 
 
 def get_transaction_timestamp(txtext):
-    return txtext[txtext.find("timestamp:") + 11:].strip().split('\n')[0]
+    return txtext[txtext.find("timestamp:") + 11:].strip().split('\n')[0].strip()
 
 
 def get_transaction_amount(txtext):
-    la = txtext.strip().split('\n')[2].replace(',', '').split(' ')
+    la = txtext.strip().split('\n')[2].replace(',', '').split(' ').strip()
     ult = la[-1]
     penult = la[-2]
     if all(c in set('.-' + string.digits) for c in ult):
@@ -223,7 +223,7 @@ def get_signer_fpr(sigtext):
     if not verified.valid:
         return
     else:
-        return verified.fingerprint
+        return verified.pubkey_fingerprint
 
 
 def getAddresses(counterparty, owner=None, commodity='BTC', side='deposit'):
