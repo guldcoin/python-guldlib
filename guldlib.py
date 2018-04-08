@@ -69,9 +69,9 @@ def get_guld_member_overview(mname):
 def get_assets_liabs(username, in_commodity=None):
     cmd = ""
     if in_commodity is not None:
-        cmd = "printf \"$(find {2} -name '*.db')\n$(grep -rl {0} {1})\" | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal ^{0}:Assets ^{0}:Liabilities -X {3}".format(username, os.path.join(GULD_HOME, "ledger", "GULD"), os.path.join(GULD_HOME, "ledger", "prices"), in_commodity)
+        cmd = "printf \"$(find {2} -name '*.db')\n$(grep -rli {0} {1})\" | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal ^{0}:Assets ^{0}:Liabilities -X {3}".format(username, os.path.join(GULD_HOME, "ledger", "GULD"), os.path.join(GULD_HOME, "ledger", "prices"), in_commodity)
     else:
-        cmd = "grep -rl {0} {1} | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal ^{0}:Assets ^{0}:Liabilities".format(username, os.path.join(GULD_HOME, "ledger", "GULD"))
+        cmd = "grep -rli {0} {1} | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal ^{0}:Assets ^{0}:Liabilities".format(username, os.path.join(GULD_HOME, "ledger", "GULD"))
     ledgerBals = subprocess.check_output(cmd, shell=True)
     return ledgerBals.decode("utf-8")
 
@@ -79,9 +79,9 @@ def get_assets_liabs(username, in_commodity=None):
 def get_balance(username, in_commodity=None):
     cmd = ""
     if in_commodity is not None:
-        cmd = "printf \"$(find {2} -name '*.db')\n$(grep -rl {0} {1})\" | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal [^a-zA-Z0-9\-]{0}[^a-zA-Z0-9\-] -X {3}".format(username, os.path.join(GULD_HOME, "ledger", "GULD"), os.path.join(GULD_HOME, "ledger", "prices"), in_commodity)
+        cmd = "printf \"$(find {2} -name '*.db')\n$(grep -rli {0} {1})\" | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal [^a-zA-Z0-9\-]{0}[^a-zA-Z0-9\-] -X {3}".format(username, os.path.join(GULD_HOME, "ledger", "GULD"), os.path.join(GULD_HOME, "ledger", "prices"), in_commodity)
     else:
-        cmd = "grep -rl {0} {1} | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal [^a-zA-Z0-9\-]{0}[^a-zA-Z0-9\-]".format(username, os.path.join(GULD_HOME, "ledger", "GULD"))
+        cmd = "grep -rli {0} {1} | grep \"\\.d[bat]*$\" | while read line ; do echo include $line ; done | ledger -f - bal [^a-zA-Z0-9\-]{0}[^a-zA-Z0-9\-]".format(username, os.path.join(GULD_HOME, "ledger", "GULD"))
     ledgerBals = subprocess.check_output(cmd, shell=True)
     return ledgerBals.decode("utf-8")
 
@@ -166,6 +166,7 @@ def gen_redeem_registration_fee(name, ntype='individual', qty=1, dt=None, tstamp
 
 
 def gen_register(nname, ntype='individual', qty=1, dt=None, tstamp=None, payer=None):
+    npayer = ''
     if payer is None:
         payer = nname
     if dt is None or tstamp is None:
@@ -176,6 +177,7 @@ def gen_register(nname, ntype='individual', qty=1, dt=None, tstamp=None, payer=N
         amount = 0.01
     elif ntype == 'group':
         amount = qty * 0.1
+        npayer = ':' + payer
     else:
         return
     return ('{1} * register {3}\n'
@@ -183,7 +185,7 @@ def gen_register(nname, ntype='individual', qty=1, dt=None, tstamp=None, payer=N
         '    {5}:Assets   -{4} GULD\n'
         '    {5}:Expenses:guld:register   {4} GULD\n'
         '    guld:Liabilities   {4} GULD\n'
-        '    guld:Income:register:{3}:{0}   -{4} GULD\n\n'.format(nname, dt, tstamp, ntype, amount, payer))
+        '    guld:Income:register:{3}:{0}{6}   -{4} GULD\n\n'.format(nname, dt, tstamp, ntype, amount, payer, npayer))
 
 
 def gen_transfer(sender, receiver, amount, commodity="GULD", dt=None, tstamp=None):
