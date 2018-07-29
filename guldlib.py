@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-__version__ = '0.1.0'
+__version__ = '0.1.2'
 import gnupg
 import os
 import re
@@ -89,7 +89,7 @@ def get_balance(username, in_commodity=None):
 def is_valid_ledger(l):
     if len(l) <= 10:
         return False
-    cmd = "result=$(printf \"{0}\"); if [ \"$result\" -eq \"\" ]; then echo \"----\"; else echo \"$result\"; fi | ledger -f - source".format(l.replace(';', '\;').replace('\n', '\\n'))
+    cmd = "result=$(printf \"{0}\"); if [ \"$result\" -eq \"\" ]; then echo \"----\"; else echo \"$result\"; fi | ledger -f - source".format(l.replace('\n', '\\n'))
     try:
         output = subprocess.check_output(cmd, shell=True)
         return output == b""
@@ -219,20 +219,32 @@ def get_transaction_type(txtext):
         return 'register group'
     elif txtext.find("* grant") > 0:
         return 'grant'
+    elif txtext.find("* Mizim ERC20 GULD Purchase") > 0:
+        return 'mizim erc20'
 
 
 def get_transaction_timestamp(txtext):
-    return txtext[txtext.find("timestamp:") + 11:].strip().split('\n')[0].strip()
-
+    if txtext.find("timestamp:") > -1:
+        return txtext[txtext.find("timestamp:") + 11:].strip().split('\n')[0].strip()
+    elif txtext.find("START_TIME:") > -1:
+        return txtext[txtext.find("START_TIME:") + 12:].strip().split('\n')[0].strip()
 
 def get_transaction_amount(txtext):
-    la = txtext.strip().split('\n')[2].replace(',', '').split(' ')
-    ult = la[-1].strip()
-    penult = la[-2].strip()
-    if all(c in set('.-' + string.digits) for c in ult):
-        return ult, penult
-    else:
-        return penult, ult
+    la = txtext.strip().split('\n')
+    first = True
+    for l in la:
+        if first:
+            first = False
+            continue
+        elif l.find(';') > -1:
+            continue
+        l = l.replace(',', '').split(' ')
+        ult = l[-1].strip()
+        penult = l[-2].strip()
+        if all(c in set('.-' + string.digits) for c in ult):
+            return ult, penult
+        else:
+            return penult, ult
 
 
 def strip_pgp_sig(sigtext):

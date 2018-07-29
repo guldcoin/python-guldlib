@@ -10,11 +10,8 @@ setup(name='guldlib',
       url='https://guld.io/',
       py_modules = ['guldlib'],
       classifiers=[
-          'Topic :: System :: Libraries',
           'Development Status :: 4 - Beta',
           'Intended Audience :: Developers',
           'License :: OSI Approved :: MIT License',
-          'Programming Language :: Python :: 2.7',
-          'Programming Language :: Python :: 3.4',
-          'Topic :: Finance'
+          'Programming Language :: Python :: 3.4'
 ])
